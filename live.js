@@ -52,8 +52,8 @@ function teardown(moduleName, needsImport) {
 
 		var promise;
 		// If this module has a `modLiveReloadTeardown` function call it.
-		if(mod.liveReloadTeardown) {
-			promise = Promise.resolve(mod.liveReloadTeardown());
+		if(typeof mod.beforeDestroy === "function") {
+			promise = Promise.resolve(mod.beforeDestroy());
 		} else {
 			promise = Promise.resolve();
 		}
@@ -82,7 +82,7 @@ function reload(moduleName) {
 	teardown(moduleName, parents).then(function(){
 		var imports = [];
 		for(var parentName in parents) {
-			imports.push(loader.import(parentName));
+			imports.push(loader["import"](parentName));
 		}
 		// Once everything is imported call the `onLiveReload` callback functions.
 		Promise.all(imports).then(function(){
@@ -95,8 +95,8 @@ function reload(moduleName) {
 
 function handleReload(moduleName){
 	var mod = loader.get(moduleName);
-	if(mod && mod.onLiveReload) {
-		mod.onLiveReload();
+	if(mod && typeof mod.afterReload === "function") {
+		mod.afterReload();
 	}
 }
 
