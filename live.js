@@ -103,14 +103,21 @@ function handleReload(moduleName){
 function setup(){
 	var port = loader.liveReloadPort || 8012;
 	
+	var host = window.document.location.host.replace(/:.*/, '');
+	var ws = new WebSocket("ws://" + host + ":" + port);
 
-	// TODO Set up a web socket to listen for messages to do a reload.
+	ws.onmessage = function(ev){
+		var moduleName = ev.data;
+		reload(moduleName);
+	};
 }
 
-if(typeof steal !== "undefined") {
-	steal.done().then(setup);
-} else {
-	setTimeout(setup);
-}
+var isBrowser = typeof window !== "undefined";
 
-window.reload = reload;
+if(isBrowser) {
+	if(typeof steal !== "undefined") {
+		steal.done().then(setup);
+	} else {
+		setTimeout(setup);
+	}
+}
