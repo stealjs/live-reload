@@ -121,3 +121,5 @@ if(isBrowser) {
 		setTimeout(setup);
 	}
 }
+
+exports.includeInBuild = false;

@@ -23,7 +23,7 @@ Add the extension as a config dependency. Either via `package.json`:
 {
   "system": {
     "configDependencies": [
-      "$live-reload"
+      "live-reload"
 	]
   }
 }
@@ -32,7 +32,7 @@ Add the extension as a config dependency. Either via `package.json`:
 Or your own config file:
 
 ```js
-import from "$live-reload";
+import from "live-reload";
 
 System.config({
   ...
