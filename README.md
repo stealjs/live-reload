@@ -67,33 +67,25 @@ Using with SystemJS takes a little extra configuration.  Probably you want to do
 
 ## API
 
-### onReloadCycle
-
-Any module that contains an `onReloadCycle` exported function will have this function called at the beginning of each reload cycle. It contains this signature: `onReloadCycle(reload(moduleName, moduleValue))`.
-
-Here's an example of a module that listens for loads, removes html when it is being unloaded and re-renders the main content on each reload:
+**live-reload** can be imported into your application. The export is a function that can be called to tap into the reload process:
 
 ```js
+import reload from "live-reload";
 
-export function onReloadCycle(reload){
+// Called after every reload cycle, re-renders the app.
+reload(function(){
+	$("#main").html(render());
+});
 
-	// Called after every reload cycle, re-renders the app.
-	reload(function(){
-		$("#main").html(render());
-	});
-
-	// Called when this module is being unloaded, used to do cleanup.
-	reload.dispose(function(){
-		$("footer").remove();
-	});
-
-};
-
+// Called when this module is being unloaded, used to do cleanup.
+reload.dispose(function(){
+	$("footer").remove();
+});
 ```
 
 #### reload
 
-onReloadCycle is called with a function `reload`. This function can be called to observe the reloading cycle:
+This function can be called to observe the reloading cycle:
 
 ##### reload(callback)
 

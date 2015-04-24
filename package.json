@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/stealjs/live-reload/issues"
   },
-  "homepage": "https://github.com/stealjs/live-reload"
+  "homepage": "https://github.com/stealjs/live-reload",
+  "devDependencies": {
+    "steal": "^0.9.3"
+  }
 }
