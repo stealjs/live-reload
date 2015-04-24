@@ -229,10 +229,9 @@ if(isBrowser) {
 		metaConfig = loader.meta["live-reload"] = {};
 	}
 	// For the build, translate to a noop.
-	metaConfig.translate = function(){
+	metaConfig.translate = function(load){
+		load.metadata.format = "amd";
 		return "def" + "ine([], function(){\n" +
 			"return function(){};\n});";
 	};
 }
-
-exports.includeInBuild = false;
