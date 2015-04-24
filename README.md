@@ -52,6 +52,7 @@ Using with SystemJS takes a little extra configuration.  Probably you want to do
 ```html
 <script src="path/to/system.js"></script>
 <script>
+  System.set("@loader", System.newModule({ default: System, __useDefault: true }));
   System.paths["live-reload"] = "node_modules/system-live-reload/live.js";
   System.liveReloadPort = 9999; // This is optional, defaults to 8012
 
