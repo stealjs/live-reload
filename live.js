@@ -80,41 +80,55 @@ function teardown(moduleName, needsImport, listeners) {
 	return Promise.resolve();
 }
 
-function startCycle(){
-	var listeners = {
+function defineReload(moduleName, listeners){
+	function reload(moduleName, callback){
+		// 3 forms
+		// reload(callback); -> after full cycle
+		// reload("foo", callback); -> after "foo" is imported.
+		// reload("*", callback); -> after each module imports.
+		var callbacks;
+		if(arguments.length === 2) {
+			callbacks = listeners.modules[moduleName] =
+				listeners[moduleName] || [];
+			callbacks.push(callback);
+			return;
+		}
+		listeners.all.push(moduleName); // Actually the callback
+	}
+
+	// This allows modules to dispose themselves
+	reload.dispose = function(callback){
+		listeners.dispose[moduleName] = callback;
+	};
+	
+	return reload;
+}
+
+function makeListeners(){
+	return {
 		modules: {},
 		dispose: {},
 		all: []
 	};
-	function defineReload(moduleName){
-		function reload(moduleName, callback){
-			// 3 forms
-			// reload(callback); -> after full cycle
-			// reload("foo", callback); -> after "foo" is imported.
-			// reload("*", callback); -> after each module imports.
-			var callbacks;
-			if(arguments.length === 2) {
-				callbacks = listeners.modules[moduleName] =
-					listeners[moduleName] || [];
-				callbacks.push(callback);
-				return;
-			}
-			listeners.all.push(moduleName); // Actually the callback
-		}
+}
 
-		// This allows modules to dispose themselves
-		reload.dispose = function(callback){
-			listeners.dispose[moduleName] = callback;
-		};
-		
-		return reload;
+function extend(a, b){
+	for(var p in b) {
+		a[p] = b[p];
 	}
+	return a;
+}
+
+function startCycle(){
+	var listeners = makeListeners();
+	extend(listeners.modules, loader._liveListeners.modules);
+	extend(listeners.dispose, loader._liveListeners.dispose);
 
 	var mod;
 	for(moduleName in loader._liveMap) {
 		mod = loader.get(moduleName);
 		if(mod && mod.onReloadCycle) {
-			mod.onReloadCycle(defineReload(moduleName));
+			mod.onReloadCycle(defineReload(moduleName, listeners));
 		}
 	}
 	return listeners;
@@ -181,5 +195,8 @@ if(isBrowser) {
 		setTimeout(setup);
 	}
 }
+
+loader._liveListeners = makeListeners();
+exports = module.exports = defineReload(null, loader._liveListeners);
 
 exports.includeInBuild = false;

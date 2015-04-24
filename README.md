@@ -66,30 +66,47 @@ Using with SystemJS takes a little extra configuration.  Probably you want to do
 
 ## API
 
-### Hooks
+### onReloadCycle
 
-**live-reload** includes 2 hooks that you can use in your code that are called during the livecycle of a reload.
+Any module that contains an `onReloadCycle` exported function will have this function called at the beginning of each reload cycle. It contains this signature: `onReloadCycle(reload(moduleName, moduleValue))`.
 
-#### beforeDestroy
+#### reload
 
-If you include a `beforeDestroy` function in your module's code, the function will be called before that module is unloaded. Use this if you need to do some cleanup because the module has side effects (such as setting a property on the `window`).
+onReloadCycle is called with a function `reload`. This function can be called to observe the reloading cycle:
+
+##### reload(callback)
+
+Provide a single callback to `reload` to have the callback called after the cycle is complete. In the following example we are re-rendering the main application after reloads:
 
 ```js
-
-export function beforeDestroy(){
-	delete window.App; // Remove a property added to the window.
-};
-
+reload(function(){
+	$("#app").html(renderApp());
+});
 ```
 
-#### afterReload
+##### reload(moduleName, callback)
 
-If you include an `afterReload` function in your module, that function will be called after every reload. This is the place to do re-initialization, if you need it, such as rerendering:
+Provide a moduleName to observe a specific module being reloaded. Use this when you need to reinit some behavior only when a specific module reloads:
 
 ```js
-export function afterReload(){
-	render();
-};
+reload("app/router", function(router){
+	window.router = router;
+	router.start();
+});
+```
+
+##### reload("*", callback)
+
+This is a special form that calls the callback for each module that is reloaded. The first parameter is the `moduleName` and the second is the `moduleValue`.
+
+#### reload.dispose
+
+`reload.dispose(callback)` can be used to do cleanup when the module being defined is unloaded. If the module creates side effects, this is where you can remove those. In this example we are removing the footer because it will be re-appended when the module gets executed.
+
+```js
+reload.dispose(function(){
+	$("footer").remove();
+});
 ```
 
 ### Options
