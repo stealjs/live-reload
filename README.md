@@ -13,6 +13,12 @@ If you're using SystemJS install with NPM:
 npm install system-live-reload --save-dev
 ```
 
+live-reload requires the `system-trace` extension so install that as well:
+
+```shell
+npm install system-trace --save-dev
+```
+
 # Use
 
 ## StealJS
@@ -47,10 +53,11 @@ In your `steal.js` script tag you can specify a port, otherwise `8012` will be u
 
 ## SystemJS
 
-Using with SystemJS takes a little extra configuration.  Probably you want to do this in the script tag following your use of SystemJS:
+Using with SystemJS takes a little extra configuration. Probably you want to do this in the script tag following your use of SystemJS:
 
 ```html
 <script src="path/to/system.js"></script>
+<script src="node_modules/system-trace/trace.js"></script>
 <script>
   System.set("@loader", System.newModule({ default: System, __useDefault: true }));
   System.paths["live-reload"] = "node_modules/system-live-reload/live.js";
@@ -64,6 +71,8 @@ Using with SystemJS takes a little extra configuration.  Probably you want to do
 
 </script>
 ```
+
+Note that a script tag for [system-trace](https://github.com/stealjs/system-trace) is included as well, this is because live-reload depends on that extension.
 
 ## API
 
