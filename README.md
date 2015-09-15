@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/stealjs/live-reload.svg?branch=master)](https://travis-ci.org/stealjs/live-reload)
+
 # live-reload
 
 An extension for [SystemJS](https://github.com/systemjs/systemjs) and 
