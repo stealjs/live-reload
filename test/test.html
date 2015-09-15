@@ -1,10 +1,10 @@
+<title>live-reload tests</title>
 <script>
+	FuncUnit = { frameMode: true };
 	steal = {
-		baseURL: "./",
 		paths: {
 			"live-reload": "../live.js"
 		}
 	};
 </script>
-<script src="../node_modules/steal/steal.js" config="config.js" main="test"
-	></script>
+<script src="../node_modules/steal/steal.js" main="test/test"></script>

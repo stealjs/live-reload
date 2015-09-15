@@ -1,18 +1,36 @@
-var reload = require("live-reload");
-var other = require("./other");
+var QUnit = require("steal-qunit");
+var liveReloadTest = require("live-reload-testing");
+var F = require("funcunit");
 
-// Keep a count of how many times this reloads.
-if(typeof window.counter !== "number") window.counter = -1;
-window.counter++;
+F.attach(QUnit);
 
-reload(function(){
-	console.log("All complete", window.counter);
+QUnit.module("basics", {
+	setup: function(assert){
+		var done = assert.async();
+		F.open("//basics/index.html", function(){
+			done();
+		});
+	},
+	teardown: function(assert){
+		var done = assert.async();
+		liveReloadTest.reset().then(function(){
+			done();
+		});
+	}
 });
 
-reload("other", function(other){
-	console.log("Other is now", other);
-});
+QUnit.test("reloads the module when the file changes", function(){
+	F(".main").size(1, "There is one main span");
 
-reload.dispose(function(){
-	console.log("Doing some cleanup");
+	F(function(){
+		var address = "test/basics/main.js";
+		var content = "var $ = require('jquery');\nvar span = $('<span class=\"main\">loaded</span>');\n$('#app').append(span);";
+
+		liveReloadTest.put(address, content).then(null, function(){
+			QUnit.ok(false, "Reload was not successful");
+			QUnit.start();
+		});
+	});
+
+	F(".main").size(2, "Reloaded so now there is a second span");
 });
