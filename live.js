@@ -93,20 +93,28 @@ loader.normalize = function(name, parentName){
 	return normalize.apply(this, arguments);
 };
 
-// Teardown a module name by deleting it and all of its parent modules.
-function teardown(moduleName, e, moduleNames) {
-	var moduleNames = moduleNames || {};
+function disposeModule(moduleName, emitter, moduleList){
+	moduleList = moduleList || {};
 
 	var mod = loader.get(moduleName);
 	if(mod) {
-		moduleNames[moduleName] = true;
-		e.emit("!dispose/" + moduleName);
+		moduleList[moduleName] = true;
+		emitter.emit("!dispose/" + moduleName);
 		loader.delete(moduleName);
 		if(loader._liveListeners[moduleName]) {
 			loader.delete("live-reload/" + moduleName);
 			delete loader._liveListeners[moduleName];
 		}
+		return true;
+	}
+	return false;
+}
 
+// Teardown a module name by deleting it and all of its parent modules.
+function teardown(moduleName, e, moduleNames) {
+	var moduleNames = moduleNames || {};
+
+	if(disposeModule(moduleName, e, moduleNames)) {
 		// Delete the module and call teardown on its parents as well.
 		var parents = loader.getDependants(moduleName);
 
@@ -114,6 +122,7 @@ function teardown(moduleName, e, moduleNames) {
 			teardown(parents[i], e, moduleNames);
 		}
 	}
+
 	return moduleNames;
 }
 
@@ -166,8 +175,8 @@ function bind(fn, ctx){
 }
 
 function reload(moduleName) {
-	//var e = startCycle();
 	var e = loader._liveEmitter;
+	var currentDeps = loader.getDependencies(moduleName);
 
 	// Call teardown to recursively delete all parents, then call `import` on the
 	// top-level parents.
@@ -186,6 +195,8 @@ function reload(moduleName) {
 	}
 	// Once everything is imported call the global listener callback functions.
 	Promise.all(imports).then(function(){
+		// Remove any newly orphaned modules before declaring the cycle complete.
+		removeOrphans(moduleName, currentDeps);
 		e.emit("!cycleComplete");
 	}, function(){
 		// There was an error re-importing modules
@@ -194,6 +205,18 @@ function reload(moduleName) {
 			loader.global.location.reload();
 		}
 	});
+}
+
+function removeOrphans(moduleName, oldDeps){
+	var deps = loader.getDependencies(moduleName);
+
+	var depName;
+	for(var i = 0, len = oldDeps.length; i < len; i++) {
+		depName = oldDeps[i];
+		if(!~deps.indexOf(depName)) {
+			disposeModule(depName, loader._liveEmitter);
+		}
+	}
 }
 
 function setup(){
