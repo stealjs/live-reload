@@ -242,7 +242,9 @@ function setup(){
 }
 
 
-var isBuildEnvironment = loader.isPlatform("build") || loader.isEnv("build");
+var isBuildEnvironment = loader.isPlatform ?
+	(loader.isPlatform("build") || loader.isEnv("build")) :
+	(typeof window === "undefined");
 
 if(!isBuildEnvironment) {
 	if(typeof steal !== "undefined") {
