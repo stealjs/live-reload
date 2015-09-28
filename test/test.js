@@ -4,6 +4,16 @@ var F = require("funcunit");
 
 F.attach(QUnit);
 
+var makeIframe = function(src){
+	var iframe = document.createElement("iframe");
+	window.removeMyself = function(){
+		delete window.removeMyself;
+		//document.body.removeChild(iframe);
+	};
+	document.body.appendChild(iframe);
+	iframe.src = src;
+};
+
 QUnit.module("basics", {
 	setup: function(assert){
 		var done = assert.async();
@@ -80,4 +90,10 @@ QUnit.test("get disposed during the reload process", function(){
 	});
 
 	F("#orphan").missing("The orphaned module was torn down");
+});
+
+QUnit.module("retries");
+
+QUnit.asyncTest("something", function(){
+	makeIframe("retry/index.html");
 });

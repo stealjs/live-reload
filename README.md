@@ -139,6 +139,14 @@ reload.dispose(function(){
 
 You can specify which port to use for the WebSocket connection. By default `8012` will be used.
 
+#### liveReloadAttempts
+
+If live-reload is unable to connect to a server it can attempt to retry on a delay. **liveReloadAttempts** specifies the number of times to try connecting. By default **liveReloadAttempts** is 1, meaning no retries will occur.
+
+#### liveReloadRetryTimeout
+
+When live-reload retries to connect to a server, **liveReloadRetryTimeout** configures the timeout, in milliseconds, before a retry will occur.
+
 ## License
 
 MIT
