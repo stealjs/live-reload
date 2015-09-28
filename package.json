@@ -1,6 +1,6 @@
 {
   "name": "system-live-reload",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Reload your application as you develop",
   "main": "live.js",
   "scripts": {
