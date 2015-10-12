@@ -114,6 +114,36 @@ QUnit.test("are not orphans if they have another parent", function(){
 
 QUnit.module("retries");
 
-QUnit.asyncTest("something", function(){
+QUnit.asyncTest("work", function(){
 	makeIframe("retry/index.html");
+});
+
+QUnit.module("disposing modules", {
+	setup: function(assert){
+		var done = assert.async();
+		F.open("//dispose/index.html", function(){
+			done();
+		});
+	},
+	teardown: function(assert){
+		var done = assert.async();
+		liveReloadTest.reset().then(function(){
+			done();
+		});
+	}
+});
+
+QUnit.test("the correct modules are disposed", function(){
+	F(function(){
+		var address = "test/dispose/child.js";
+		var content = "requ" + "ire('./other');\nrequ" + "ire('./third');\nvar foo;";
+
+		liveReloadTest.put(address, content).then(null, function(){
+			QUnit.ok(false, "Reload was not successful");
+			QUnit.start();
+		});
+	});
+
+	F("#done").exists("Reloading completed");
+	F("#disposed").missing("The 'other' module wasn't disposed");
 });
