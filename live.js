@@ -161,6 +161,12 @@ function makeReload(moduleName, listeners){
 		setupUnbind(event, callback);
 	};
 
+	// This allows modules to dispose of other modules
+	// This might be needed for cleanup.
+	reload.disposeModule = function(name){
+		disposeModule(name, e);
+	};
+
 	function setupUnbind(event, callback){
 		e.once("!dispose/" + moduleName, function(){
 			e.off(event, callback);
