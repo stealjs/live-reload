@@ -44,7 +44,8 @@ QUnit.test("Can take an array of moduleNames to teardown", function(assert){
 	loader.set("bar", loader.newModule({default: {bar: 'qux'}}));
 	assert.equal(loader.get("bar").default.bar, "qux", "bar is right");
 
-	reload(["foo", "bar"])
+	var msg = JSON.stringify(["foo", "bar"]);
+	reload(msg)
 	.then(function(){
 		assert.equal(loader.get("foo").default.foo, 'bar', "value has updated");
 		assert.equal(loader.get("bar").default.bar, "bam", "bar value has updated");
