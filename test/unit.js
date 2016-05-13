@@ -56,34 +56,98 @@ QUnit.test("Can take an array of moduleNames to teardown", function(assert){
 	.then(done, done);
 });
 
+QUnit.module("orphaned modules");
+
+QUnit.test("are deleted when a parent module no longer uses it", function(assert){
+	var done = assert.async();
+	var fooSrc;
+
+	var fetch = loader.fetch;
+	var test = this;
+	loader.fetch = function(load){
+		if(load.name === "foo") {
+			var src = fooSrc || "req" + "uire('bar');";
+			return Promise.resolve(src);
+		} else if(load.name === "bar") {
+			return Promise.resolve("exports.foo = 'bar';");
+		}
+	};
+
+	loader.import("foo")
+	.then(function(){
+		assert.ok(loader.has("foo"), "has foo");
+		assert.ok(loader.has("bar"), "has bar");
+	})
+	.then(function(reload){
+		fooSrc = "var a;";
+		return reloader("foo");
+	})
+	.then(function(){
+		assert.ok(!loader.has("bar"), "orphaned module removed");
+	})
+	.then(function(){
+		loader.fetch = fetch;
+		loader.delete("foo");
+		loader.delete("bar");
+	})
+	.then(done, done);
+});
+
+QUnit.test("are not removed if they have another parent", function(assert){
+	var done = assert.async();
+	var fooSrc;
+
+	var fetch = loader.fetch;
+	var test = this;
+	loader.fetch = function(load){
+		if(load.name === "foo") {
+			var src = fooSrc || "req" + "uire('bar');";
+			return Promise.resolve(src);
+		} else if(load.name === "bar") {
+			return Promise.resolve("exports.foo = 'bar';");
+		} else if(load.name === "qux") {
+			return Promise.resolve("req" + "uire('bar');");
+		}
+	};
+
+	loader.import("foo")
+	.then(function(){
+		return loader.import("qux");
+	}).then(function(){
+		assert.ok(loader.has("foo"), "has foo");
+		assert.ok(loader.has("bar"), "has bar");
+		assert.ok(loader.has("qux"), "has qux");
+	})
+	.then(function(reload){
+		fooSrc = "var a;";
+		return reloader("foo");
+	})
+	.then(function(){
+		assert.ok(loader.has("bar"), "orphaned module removed");
+	})
+	.then(function(){
+		loader.fetch = fetch;
+		loader.delete("foo");
+		loader.delete("bar");
+		loader.delete("qux");
+	})
+	.then(done, done);
+});
+
 QUnit.module("reload.dispose", {
 	setup: function(assert){
-		var done = assert.async();
 		var test = this;
 
 		var fetch = this.oldFetch = loader.fetch;
 		loader.fetch = function(load){
 			if(load.name === "foo") {
-				var src = "requ" + "ire('bar');";
-				return Promise.resolve(src);
+				return Promise.resolve("requ" + "ire('bar');");
 			} else if(load.name === "bar") {
 				return Promise.resolve("exports.bar = 'bam'");
+			} else if(load.name === "baz") {
+				return Promise.resolve("requ" + "ire('foo');");
 			}
 		};
-
-		loader.import("live-reload", { name: "reload-foo-test" })
-		.then(function(reload){
-			// foo depends on bar
-
-
-			reload.dispose("foo", function(){
-
-			});
-
-			reloader("foo");
-		})
-		.then(done, done);
-
 	},
 	teardown: function(){
 		loader.fetch = this.oldFetch;
@@ -108,7 +172,7 @@ QUnit.test("disposes only the modules that it should", function(assert){
 			assert.ok(true, "it worked");
 		});
 
-		reloader("foo");
+		return reloader("foo");
 	})
 	.then(done, done);
 });
