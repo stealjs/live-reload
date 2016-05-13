@@ -182,10 +182,18 @@ function bind(fn, ctx){
 	};
 }
 
-function reloadAll(moduleNames) {
-	if(typeof moduleNames === "string") {
-		moduleNames = [moduleNames];
+function getModuleNames(msg) {
+	var names;
+	try {
+		names = JSON.parse(msg);
+	} catch(ex) {
+		names = [msg];
 	}
+	return names;
+}
+
+function reloadAll(msg) {
+	var moduleNames = getModuleNames(msg);
 	var promises = [];
 	for(var i = 0, len = moduleNames.length; i < len; i++) {
 		promises.push(reload(moduleNames[i]));

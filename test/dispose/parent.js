@@ -1,2 +1,0 @@
-require("./child");
-require("./third");
