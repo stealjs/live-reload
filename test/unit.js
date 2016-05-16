@@ -1,5 +1,4 @@
 var QUnit = require("steal-qunit");
-var reload = require("live-reload");
 var reloader = require("live-reload");
 var loader = require("@loader");
 
@@ -22,7 +21,7 @@ QUnit.module("Unit tests", {
 });
 
 QUnit.test("Exports a function", function(assert){
-	assert.equal(typeof reload, "function", "reload is a function");
+	assert.equal(typeof reloader, "function", "reload is a function");
 });
 
 QUnit.test("Can take a moduleName to teardown", function(assert){
@@ -31,7 +30,7 @@ QUnit.test("Can take a moduleName to teardown", function(assert){
 	loader.set("foo", loader.newModule({default: {foo:'hah'}}));
 	assert.equal(loader.get("foo").default.foo, 'hah', "initial value is right");
 
-	reload("foo")
+	reloader("foo")
 	.then(function(){
 		assert.equal(loader.get("foo").default.foo, 'bar', "value has updated");
 	})
@@ -48,10 +47,38 @@ QUnit.test("Can take an array of moduleNames to teardown", function(assert){
 	assert.equal(loader.get("bar").default.bar, "qux", "bar is right");
 
 	var msg = JSON.stringify(["foo", "bar"]);
-	reload(msg)
+	reloader(msg)
 	.then(function(){
 		assert.equal(loader.get("foo").default.foo, 'bar', "value has updated");
 		assert.equal(loader.get("bar").default.bar, "bam", "bar value has updated");
+	})
+	.then(done, done);
+});
+
+QUnit.module("reload.isReloading");
+
+QUnit.test("is false by default", function(assert){
+	var done = assert.async();
+
+	loader.import("live-reload", { name: "reload-test" })
+	.then(function(reload){
+		assert.equal(reload.isReloading(), false, "no reload is happening");
+	})
+	.then(done, done);
+});
+
+QUnit.test("is true while in a reload cycle", function(assert){
+	var done = assert.async();
+
+	loader.import("live-reload", { name: "reload-test" })
+	.then(function(reload){
+		var p = reloader("foo");
+
+		assert.equal(reload.isReloading(), true, "Now it is reloading");
+
+		return p.then(function(){
+			assert.equal(reload.isReloading(), false, "False because we are not reloading");
+		});
 	})
 	.then(done, done);
 });
