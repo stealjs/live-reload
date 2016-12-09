@@ -26,12 +26,12 @@
   "homepage": "https://github.com/stealjs/live-reload",
   "devDependencies": {
     "funcunit": "^3.0.0",
-    "grunt": "^0.4.5",
-    "jquery": "^2.1.4",
+    "grunt": "^1.0.1",
+    "jquery": "^3.1.1",
     "live-reload-testing": "^5.1.0",
     "steal": "^0.16.0",
     "steal-qunit": "^0.1.1",
-    "testee": "^0.2.0"
+    "testee": "^0.3.0"
   },
   "system": {
 	"npmAlgorithm": "flat",
