@@ -5,6 +5,10 @@
 An extension for [SystemJS](https://github.com/systemjs/systemjs) and 
 [StealJS](http://stealjs.com/) that reloads your code as you develop. Pair with a websocket server such as [StealTools](https://github.com/stealjs/steal-tools) to develop without ever having to manually refresh the page.
 
+# DEPRECATED
+
+The live reload extension was [merged into StealJS](https://github.com/stealjs/steal/pull/1129) core and this repository will no longer be maintained.
+
 # Install
 
 If you're using StealJS, live-reload is included by default. Skip to the **Use** section.
